@@ -1,0 +1,20 @@
+{
+  "name": "bobmulder/composer-ui",
+  "description": "Composer tools and UI for Composer",
+  "require": {
+    "symfony/process": "~3.0@dev"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "*"
+  },
+  "autoload": {
+    "psr-4": {
+      "ComposerUI\\": "src"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+    }
+  },
+  "minimum-stability": "dev"
+}
