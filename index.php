@@ -15,26 +15,32 @@ $composer = new ComposerHelper();
 debug('welcome to ComposerTools. This stuff is needed before setting up a full working UI');
 
 /**
- * Installing a package
+ * Installing packages
  *
- * You can installing a package by calling `requirePackage`.
+ * You can installing a package by calling `requirePackages`.
  * Use the first parameter to define the package.
  * Use the second parameter to define the version.
  */
-//$composer->requirePackage('symfony/config', 'dev-master');
+//$composer->requirePackages([
+//    'symfony/stopwatch' => 'dev-master',
+//    'symfony/yaml',
+//]);
 
 
 /**
- * Removing a package
+ * Removing packages
  *
- * You can remove a package by calling `removePackage`.
+ * You can remove a package by calling `removePackages`.
  * Use the first parameter to define the package.
  */
-//$composer->removePackage('symfony/config');
+//$composer->removePackages([
+//    'symfony/stopwatch' => 'dev-master',
+//    'symfony/yaml',
+//]);
 
 /**
  * Update packages
  *
  * You can update composer by calling `update`.
  */
-//$composer->update();
+$composer->update();

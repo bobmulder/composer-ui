@@ -3,14 +3,40 @@
 namespace ComposerUI;
 
 use Symfony\Component\Process\Process;
+use Symfony\Component\Process\ProcessUtils;
 
 class ComposerHelper
 {
 
+    /**
+     * The working path to regenerate from.
+     *
+     * @var string
+     */
+    protected $workingPath;
+
+    /**
+     * Create a new ComposerHelper instance.
+     *
+     * @param  string $workingPath
+     */
+    public function __construct($workingPath = null)
+    {
+        set_time_limit(0);
+
+        $this->workingPath = $workingPath;
+    }
+
+    /**
+     * Call composer command.
+     *
+     * @return string
+     */
     public function composer()
     {
-        $process = new Process('composer');
-        $process->setTimeout(3600);
+        $process = $this->getProcess();
+        $process->setCommandLine($this->findComposer());
+
         $process->run();
 
         // executes after the command finishes
@@ -21,10 +47,16 @@ class ComposerHelper
         return $process->getOutput();
     }
 
+    /**
+     * Update composer packages.
+     *
+     * @return Process
+     */
     public function update()
     {
-        $process = new Process('composer update');
-        $process->setTimeout(3600);
+        $process = $this->getProcess();
+        $process->setCommandLine($this->findComposer() . 'update');
+
         $process->run(function ($type, $buffer) {
             if (Process::ERR === $type) {
                 echo '<pre>ERR > ' . $buffer . '</pre>';
@@ -36,10 +68,19 @@ class ComposerHelper
         return $process;
     }
 
-    public function requirePackage($package, $version)
+    /**
+     * Require one or multiple packages.
+     *
+     * @param array $packages Package name.
+     * @return Process
+     */
+    public function requirePackages(array $packages)
     {
-        $process = new Process('composer require ' . $package . ':' . $version);
-        $process->setTimeout(3600);
+        $packageString = $this->normalizePackages($packages);
+
+        $process = $this->getProcess();
+        $process->setCommandLine($this->findComposer() . 'require ' . $packageString);
+
         $process->run(function ($type, $buffer) {
             if (Process::ERR === $type) {
                 echo '<pre>ERR > ' . $buffer . '</pre>';
@@ -50,10 +91,19 @@ class ComposerHelper
         return $process;
     }
 
-    public function removePackage($package)
+    /**
+     * Remove one or more packages.
+     *
+     * @param array $packages Package name.
+     * @return Process
+     */
+    public function removePackages(array $packages)
     {
-        $process = new Process('composer remove ' . $package);
-        $process->setTimeout(3600);
+        $packageString = $this->normalizePackages($packages);
+
+        $process = $this->getProcess();
+        $process->setCommandLine($this->findComposer() . 'remove ' . $packageString);
+
         $process->run(function ($type, $buffer) {
             if (Process::ERR === $type) {
                 echo '<pre>ERR > ' . $buffer . '</pre>';
@@ -61,8 +111,76 @@ class ComposerHelper
                 echo '<pre>OUT > ' . $buffer . '</pre>';
             }
         });
+        return $process;
+    }
 
-        $this->update();
+    /**
+     * Get the composer command for the environment.
+     *
+     * @return string
+     */
+    protected function findComposer()
+    {
+        if (!file_exists($this->workingPath . '/composer.phar')) {
+            return 'composer ';
+        }
+
+        $binary = ProcessUtils::escapeArgument((new PhpExecutableFinder)->find(false));
+
+        if (defined('HHVM_VERSION')) {
+            $binary .= ' --php';
+        }
+
+        return "{$binary} composer.phar ";
+    }
+
+    /**
+     * Get a new Symfony process instance.
+     *
+     * @return \Symfony\Component\Process\Process
+     */
+    protected function getProcess()
+    {
+        return (new Process('', $this->workingPath))->setTimeout(null);
+    }
+
+    /**
+     * Returns a list of packages into a string to use in composer call.
+     *
+     * Example input: [
+     *      'symfony/yaml' => 'dev-master',
+     *      'symfony/config'
+     * ];
+     *
+     * Example output: "symfony/yaml:dev-master" "symfony/config"
+     *
+     * @param array $packages
+     * @return string
+     */
+    protected function normalizePackages(array $packages)
+    {
+        $packageList = [];
+        foreach ((array)$packages as $packageName => $packageVersion) {
+            if (is_int($packageName)) {
+                $packageName = $packageVersion;
+                $packageVersion = false;
+            }
+            $packageList[] = escapeshellarg($packageName . (($packageVersion) ? ":" . $packageVersion : ""));
+        }
+        return implode(" ", $packageList);
+    }
+
+    /**
+     * Set the working path used by the class.
+     *
+     * @param  string $path
+     * @return $this
+     */
+    public function setWorkingPath($path)
+    {
+        $this->workingPath = realpath($path);
+
+        return $this;
     }
 
 }
