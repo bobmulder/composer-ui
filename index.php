@@ -15,6 +15,22 @@ $composer = new ComposerHelper();
 debug('welcome to ComposerTools. This stuff is needed before setting up a full working UI');
 
 /**
+ * Call composer
+ *
+ * You can call composer by calling `composer`.
+ */
+//$composer->composer();
+
+/**
+ * Archive composer
+ *
+ * You can archive composer by calling `archive`.
+ */
+//$composer->archive();
+
+
+
+/**
  * Installing packages
  *
  * You can installing a package by calling `requirePackages`.
@@ -41,4 +57,4 @@ debug('welcome to ComposerTools. This stuff is needed before setting up a full w
  *
  * You can update composer by calling `update`.
  */
-$composer->update();
+//$composer->update();

@@ -37,14 +37,15 @@ class ComposerHelper
         $process = $this->getProcess();
         $process->setCommandLine($this->findComposer());
 
-        $process->run();
+        return $this->runProcess($process);
+    }
 
-        // executes after the command finishes
-        if (!$process->isSuccessful()) {
-            throw new \RuntimeException($process->getErrorOutput());
-        }
+    public function archive()
+    {
+        $process = $this->getProcess();
+        $process->setCommandLine($this->findComposer() . 'archive');
 
-        return $process->getOutput();
+        return $this->runProcess($process);
     }
 
     /**
@@ -57,15 +58,7 @@ class ComposerHelper
         $process = $this->getProcess();
         $process->setCommandLine($this->findComposer() . 'update');
 
-        $process->run(function ($type, $buffer) {
-            if (Process::ERR === $type) {
-                echo '<pre>ERR > ' . $buffer . '</pre>';
-            } else {
-                echo '<pre>OUT > ' . $buffer . '</pre>';
-            }
-        });
-
-        return $process;
+        return $this->runProcess($process);
     }
 
     /**
@@ -81,14 +74,7 @@ class ComposerHelper
         $process = $this->getProcess();
         $process->setCommandLine($this->findComposer() . 'require ' . $packageString);
 
-        $process->run(function ($type, $buffer) {
-            if (Process::ERR === $type) {
-                echo '<pre>ERR > ' . $buffer . '</pre>';
-            } else {
-                echo '<pre>OUT > ' . $buffer . '</pre>';
-            }
-        });
-        return $process;
+        return $this->runProcess($process);
     }
 
     /**
@@ -106,14 +92,7 @@ class ComposerHelper
         $process = $this->getProcess();
         $process->setCommandLine($this->findComposer() . 'remove ' . $packageString);
 
-        $process->run(function ($type, $buffer) {
-            if (Process::ERR === $type) {
-                echo '<pre>ERR > ' . $buffer . '</pre>';
-            } else {
-                echo '<pre>OUT > ' . $buffer . '</pre>';
-            }
-        });
-        return $process;
+        return $this->runProcess($process);
     }
 
     /**
@@ -147,6 +126,24 @@ class ComposerHelper
     }
 
     /**
+     * Runs the process and debugs result.
+     *
+     * @param Process $process
+     * @return Process
+     */
+    protected function runProcess(Process $process)
+    {
+        $process->mustRun(function ($type, $buffer) {
+            if (Process::ERR === $type) {
+                echo '<pre>ERR > ' . $buffer . '</pre>';
+            } else {
+                echo '<pre>OUT > ' . $buffer . '</pre>';
+            }
+        });
+        return $process;
+    }
+
+    /**
      * Returns a list of packages into a string to use in composer call.
      *
      * Example input: [
@@ -176,7 +173,7 @@ class ComposerHelper
                 $packageName = $packageVersion;
                 $packageVersion = false;
             }
-            if($options['packageVersion'] === false) {
+            if ($options['packageVersion'] === false) {
                 $packageVersion = false;
             }
             $packageList[] = escapeshellarg($packageName . (($packageVersion) ? ":" . $packageVersion : ""));
