@@ -99,7 +99,9 @@ class ComposerHelper
      */
     public function removePackages(array $packages)
     {
-        $packageString = $this->normalizePackages($packages);
+        $packageString = $this->normalizePackages($packages, [
+            'packageVersion' => false
+        ]);
 
         $process = $this->getProcess();
         $process->setCommandLine($this->findComposer() . 'remove ' . $packageString);
@@ -154,15 +156,27 @@ class ComposerHelper
      *
      * Example output: "symfony/yaml:dev-master" "symfony/config"
      *
+     * ### Options
+     * - `packageVersion` - Add package version into the string. If false, only the package name will be used.
+     *
      * @param array $packages
+     * @param array $options
      * @return string
      */
-    protected function normalizePackages(array $packages)
+    protected function normalizePackages(array $packages, array $options = [])
     {
+        $_options = [
+            'packageVersion' => true
+        ];
+        $options = array_merge($_options, $options);
+
         $packageList = [];
         foreach ((array)$packages as $packageName => $packageVersion) {
             if (is_int($packageName)) {
                 $packageName = $packageVersion;
+                $packageVersion = false;
+            }
+            if($options['packageVersion'] === false) {
                 $packageVersion = false;
             }
             $packageList[] = escapeshellarg($packageName . (($packageVersion) ? ":" . $packageVersion : ""));

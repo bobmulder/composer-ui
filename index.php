@@ -23,7 +23,6 @@ debug('welcome to ComposerTools. This stuff is needed before setting up a full w
  */
 //$composer->requirePackages([
 //    'symfony/stopwatch' => 'dev-master',
-//    'symfony/yaml',
 //]);
 
 
@@ -35,7 +34,6 @@ debug('welcome to ComposerTools. This stuff is needed before setting up a full w
  */
 //$composer->removePackages([
 //    'symfony/stopwatch' => 'dev-master',
-//    'symfony/yaml',
 //]);
 
 /**
