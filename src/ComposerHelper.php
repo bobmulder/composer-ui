@@ -40,6 +40,23 @@ class ComposerHelper
         return $this->runProcess($process);
     }
 
+    /**
+     * Install composer packages.
+     *
+     * @return Process
+     */
+    public function install()
+    {
+        $process = $this->getProcess();
+        $process->setCommandLine($this->findComposer() . 'install');
+
+        return $this->runProcess($process);
+    }
+
+    /**
+     * Generates zip/tar
+     * @return Process
+     */
     public function archive()
     {
         $process = $this->getProcess();

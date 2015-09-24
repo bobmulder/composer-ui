@@ -21,13 +21,22 @@ debug('welcome to ComposerTools. This stuff is needed before setting up a full w
  */
 //$composer->composer();
 
+
+
+/**
+ * Install packages
+ *
+ * You can install composer packages by calling `install`.
+ */
+//$composer->install();
+
+
 /**
  * Archive composer
  *
  * You can archive composer by calling `archive`.
  */
 //$composer->archive();
-
 
 
 /**
@@ -51,6 +60,7 @@ debug('welcome to ComposerTools. This stuff is needed before setting up a full w
 //$composer->removePackages([
 //    'symfony/stopwatch' => 'dev-master',
 //]);
+
 
 /**
  * Update packages
