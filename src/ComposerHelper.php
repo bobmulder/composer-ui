@@ -30,12 +30,13 @@ class ComposerHelper
     /**
      * Call composer command.
      *
+     * @param array $options
      * @return string
      */
-    public function composer()
+    public function composer(array $options = [])
     {
         $process = $this->getProcess();
-        $process->setCommandLine($this->findComposer());
+        $process->setCommandLine($this->findComposer() . $this->normalizeOptions($options));
 
         return $this->runProcess($process);
     }
@@ -43,24 +44,26 @@ class ComposerHelper
     /**
      * Install composer packages.
      *
+     * @param array $options
      * @return Process
      */
-    public function install()
+    public function install(array $options = [])
     {
         $process = $this->getProcess();
-        $process->setCommandLine($this->findComposer() . 'install');
+        $process->setCommandLine($this->findComposer() . 'install' . $this->normalizeOptions($options));
 
         return $this->runProcess($process);
     }
 
     /**
      * Generates zip/tar
+     * @param array $options
      * @return Process
      */
-    public function archive()
+    public function archive(array $options = [])
     {
         $process = $this->getProcess();
-        $process->setCommandLine($this->findComposer() . 'archive');
+        $process->setCommandLine($this->findComposer() . 'archive' . $this->normalizeOptions($options));
 
         return $this->runProcess($process);
     }
@@ -68,12 +71,13 @@ class ComposerHelper
     /**
      * Update composer packages.
      *
+     * @param array $options
      * @return Process
      */
-    public function update()
+    public function update(array $options = [])
     {
         $process = $this->getProcess();
-        $process->setCommandLine($this->findComposer() . 'update');
+        $process->setCommandLine($this->findComposer() . 'update' . $this->normalizeOptions($options));
 
         return $this->runProcess($process);
     }
@@ -82,14 +86,16 @@ class ComposerHelper
      * Require one or multiple packages.
      *
      * @param array $packages Package name.
+     * @param array $options
      * @return Process
      */
-    public function requirePackages(array $packages)
+    public function requirePackages(array $packages, array $options = [])
     {
         $packageString = $this->normalizePackages($packages);
+        $optionsString = $this->normalizeOptions($options);
 
         $process = $this->getProcess();
-        $process->setCommandLine($this->findComposer() . 'require ' . $packageString);
+        $process->setCommandLine($this->findComposer() . 'require ' . $packageString . $optionsString);
 
         return $this->runProcess($process);
     }
@@ -98,16 +104,18 @@ class ComposerHelper
      * Remove one or more packages.
      *
      * @param array $packages Package name.
+     * @param array $options
      * @return Process
      */
-    public function removePackages(array $packages)
+    public function removePackages(array $packages, array $options = [])
     {
         $packageString = $this->normalizePackages($packages, [
             'packageVersion' => false
         ]);
+        $optionsString = $this->normalizeOptions($options);
 
         $process = $this->getProcess();
-        $process->setCommandLine($this->findComposer() . 'remove ' . $packageString);
+        $process->setCommandLine($this->findComposer() . 'remove ' . $packageString . $optionsString);
 
         return $this->runProcess($process);
     }
@@ -196,6 +204,25 @@ class ComposerHelper
             $packageList[] = escapeshellarg($packageName . (($packageVersion) ? ":" . $packageVersion : ""));
         }
         return implode(" ", $packageList);
+    }
+
+    /**
+     * Returns a list of options into a string of options to use in composer call.
+     *
+     * @param array $options
+     * @return string
+     */
+    protected function normalizeOptions(array $options)
+    {
+        $optionsList = [];
+        foreach ((array)$options as $option => $value) {
+            if (is_int($option)) {
+                $option = $value;
+                $value = false;
+            }
+            $optionsList[] = $option . (($value) ? " " . escapeshellarg($value) : "");
+        }
+        return " " . implode(" ", $optionsList);
     }
 
     /**
